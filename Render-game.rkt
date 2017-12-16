@@ -260,7 +260,7 @@
 
 (define (world-to-scene w)
   (if(string=? (world-state w) "ready")
-     ;;;; Court background is yellow during reset state
+     ;;;; Court background is yellow during reset state 
      (add-ball-to-scene (world-balls w) (racket-in-empty-court-scene w))
      (if
       (racket-selected? (world-racket w)) ;;;; show mouse location as a

@@ -57,6 +57,7 @@
 ;;;                relative to the origin of the scene
 ;;; vx : Int    x component of the ball's velocity, in pixels/tick
 ;;; vy : Int    y component of the ball's velocity, in pixels/tick
+;;; life : NonNegInt  time for which ball is alive
 ;;;
 ;;; EXPLAINATION:
 ;;;
