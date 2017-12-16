@@ -14,6 +14,7 @@
 (require 2htdp/image)
 
 (provide
+ TOTAL-MISS
  FPS
  WIDTH
  HEIGHT
@@ -35,6 +36,8 @@
 ;;; CONSTANTS
 
 (define FPS 30)
+
+(define TOTAL-MISS 10)
 
 ;;; Dimensions of the playing window
 (define WIDTH 1340)  ;;; Window Width
@@ -83,7 +86,7 @@
 
 ;;; IMPLEMENTATION OF WORLD
 (define-struct world
-  (balls racket state time playtime-ticker resetting-ticker score))
+  (balls racket state time miss))
 
 ;;; CONSTRUCTOR TEMPLATE:
 ;;; (make-world BallList Racket Boolean PosInt NonNegInt)
@@ -95,9 +98,7 @@
        (world-racket w) 
        (world-state w)
        (world-time w)
-       (world-playtime-ticker w)
-       (world-resetting-ticker w)
-       (world-score w)))
+       (world-miss w)))
 
 
 ;; a STATE is represented by one of :
