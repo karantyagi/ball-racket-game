@@ -12,6 +12,8 @@
 (require "extras.rkt") 
 (require 2htdp/universe)
 (require 2htdp/image)
+(require "Balls.rkt")
+(require "Racket.rkt")
 
 (provide
  TOTAL-MISS
@@ -50,8 +52,7 @@
 ;;; Court turns from white to yellow for 3 seconds while resetting in which
 ;;; rally state resets to ready-to-serve state.
 
-(define RESET-TIME  2.5)
-;;; the number of seconds to complete the reset process in real time
+(define SPACE " ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; DATA DEFINITIONS
@@ -108,7 +109,7 @@
 ;; A State is one of
 ;; -- "ready"
 ;; -- "play"
-;; -- "reset" 
+;; -- "pause" 
 
 
 ;; CONSTRUCTOR TEMPLATE: Not needed.
@@ -120,3 +121,134 @@
     [(string=? s "ready") ...]
     [(string=? s "play")  ...]
     [(string=? s "reset")   ...]))
+
+
+;;;;;;;;;;;;;;; Function ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(define (simulation speed)
+  (big-bang (initial-world speed)          
+            (on-tick world-after-tick speed)
+            (on-draw world-to-scene)
+            (on-key world-after-key-event)
+            (on-mouse world-after-mouse-event)))
+
+;;; initial-world : PosReal -> World
+;;; GIVEN:   the speed of the simulation, in seconds per tick
+;;;          (so larger numbers run slower)
+;;; RETURNS: the ready-to-serve state of the world
+;;; EXAMPLES:  (initial-world 0.5)
+;;;            (initial-world 1/24)
+;;; DESIGN STRATEGY: Use constructor template on World
+(define (initial-world speed)
+  (make-world
+   (cons
+    (make-ball
+     INITIAL-BALL-X INITIAL-BALL-Y
+     INITIAL-BALL-VX INITIAL-BALL-VY) empty)
+     (make-racket INITIAL-RACKET-X
+                INITIAL-RACKET-Y
+                INITIAL-RACKET-VX
+                INITIAL-RACKET-VY
+                0 0
+                #false)
+      "ready"                            
+       0 0))
+
+
+; world-after-key-event : World KeyEvent -> World
+; GIVEN: a world w and a key event kev
+; RETURNS: the world that should follow the given world
+;     after the given key event
+;;EXAMPLES :
+;; (world-paused? (world-after-key-event (initial-world 1/24) " ")) -->  #f
+; DESIGN STRATEGY : divide into cases on kev and w
+(define (world-after-key-event w kev)
+  (cond
+    [(key=? kev SPACE) (world-state-after-space w)]
+;    [(and (key=? kev B-KEY) (world-rally-state? w))
+;     (add-balls-in-world w)]
+    [else w]))
+
+
+;;;;world-state-after-space : World -> World
+;;GIVEN:  a world w 
+;;RETURN: either a world in rally state if it was in ready-to-serve
+;; or world in paused state if it was in paused-state
+;;EXAMPLES:
+;; (check-equal?
+;;   ( world-paused? ((world-state-after-space
+;;                      (world-in-rally-state
+;;                                (initial-world 1/24))))
+;;                   -> #t
+
+;;DESIGN STRATEGY: divide into cases on world w state 
+(define (world-state-after-space w)
+  (cond
+    [(string=? (world-state w) "play") (world-in-pause-state w)]
+    [(string=? (world-state w) "ready") (world-in-start-state w)]
+    [(string=? (world-state w) "pause") (world-in-play-state w)]))
+
+
+;; world-after-mouse-event: World Int Int MouseEvent -> World
+; GIVEN: a world, the x and y coordinates of a mouse event,
+;     and the mouse event
+; RETURNS: the world that should follow the given world after
+;     the given mouse event
+
+;; EXAMPLES:
+;; (world-ready-to-serve?
+;;    (world-after-mouse-event
+;;       (initial-world 1/24) 330 380 "button-down"))
+;;  ->#t
+
+;;DESIGN STRATEGY: cases on world(w) state 
+
+(define (world-after-mouse-event w mx my mev)
+  (if (string=? (world-state w) "play")
+      (make-world
+       (world-balls w)
+       (racket-after-mouse-event (world-racket w) mx my mev)
+       (world-time w)
+       (world-miss w))
+      w))
+
+;; world-in-paused-state : World -> World
+;; GIVEN :  a world w in rally state
+;; RETURNS: a world just like the given one, but with paused? toggled
+;; DESIGN STRATEGY: use constructor template for World on w
+;; EXAMPLES:
+;; (world-paused? (world-in-paused-state (initial-world 1/24)))
+;; -----> #t
+
+(define (world-in-paused-state w)
+  (make-world
+   (world-balls w)
+   (world-racket w)
+   "pause"
+   (world-time w)
+   (world-miss w)))
+
+
+;; world-after-tick : World -> World
+;; GIVEN: a world  w
+;; RETURNS: the world that should follow w after a tick.  If the world
+;;   is paused, returns it unchanged.  Otherwise, builds a new world
+;;   with updated ball and racket.
+;; EXAMPLES:
+;; (world-paused?(world-after-tick (initial-world 1/24))) -> #f
+
+;; STRATEGY: Cases on world w, then use constructor template of World 
+(define (world-after-tick w)
+  (cond
+    [ ((string=? (world-state w) "pause")) w]
+    [(empty? (world-balls w))
+     (world-in-paused-state w)]
+    [(racket-collide-frontwall? (world-racket w))
+     (world-at-game-over w)]
+    [ else
+      (world-during-play-state w)]))
+
+
+
+
