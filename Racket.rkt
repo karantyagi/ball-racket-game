@@ -22,12 +22,9 @@
  racket-y
  racket-vx
  racket-vy
- racket-mouse
- racket-selected?
- make-mouse
- mouse?
- mouse-x
- mouse-y)
+ racket-mx
+ racket-my
+ racket-selected?)
 
 ;;; CONSTANTS
 
@@ -77,7 +74,7 @@
 ;;; selected? : Boolean   true iff the racket is selected
 
 ;;; IMPLEMENTATION:
-(define-struct racket (x y vx vy mouse selected?))
+(define-struct racket (x y vx vy mx my selected?))
 
 ;;; CONSTRUCTOR TEMPLATE
 ;;; (make-racket Integer Integer Integer Integer Mouse Boolean)
@@ -89,30 +86,9 @@
        (racket-y r)
        (racket-vx r)
        (racket-vy r)
-       (racket-mouse r)
-       (racket-selected?)))
+       (racket-mx r)
+       (racket-my r)
+       (racket-selected? r)))
 
 
-;;; Mouse
-;;; It is rendered as a blue circle in the simulation, iff racket is selected. 
-;;;
-;;; REPRESENTATION:
-;;;
-;;; A Mouse is represented as a struct (make-mouse x y)
-;;; with the following fields:
-;;; x : Integer    x-coordinate of the mouse, in pixels, 
-;;;                relative to the origin of the scene, assuming the racket
-;;;                to be a straight line of a fixed length
-;;; y : Integer    y-coordinate mouse, relative to the origin of the scene
 
-;;; IMPLEMENTATION:
-(define-struct mouse (x y))
-
-;;; CONSTRUCTOR TEMPLATE
-;;; (make-mouse Integer Integer)
-
-;;; OBSERVER TEMPLATE
-;;; mouse-fn : Mouse -> ??
-(define (mouse-fn m)
-  (... (mouse-x m)
-       (mouse-y m)))
