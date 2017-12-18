@@ -3,6 +3,7 @@
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Racket) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require "extras.rkt") 
 (require 2htdp/image)
+(require 2htdp/universe)
 
 (provide 
  MOUSE-COLOR
@@ -24,12 +25,18 @@
  racket-vy
  racket-mx
  racket-my
- racket-selected?)
+ racket-selected?
+ racket-after-mouse-event
+ racket-after-button-down
+ racket-after-drag
+ racket-after-button-up
+ in-racket?
+ racket-collide-frontwall?)
 
 ;;; CONSTANTS
 
 (define MOUSE-COLOR "blue")
-(define MOUSE-RADIUS 4)
+(define MOUSE-RADIUS 3)
 ;;; Mouse is rendered as a circle drawn at current mouse co-ordinates,
 ;;; iff Racket is selected.
 ;;; color of circle:  MOUSE-COLOR
@@ -39,20 +46,20 @@
 ;;; The maximum distance of mouse from rectangle, to grab and select
 ;;; the rectangle.
 
-(define RACKET-COLOR "Green")
-(define RACKET-WIDTH 70)
+(define RACKET-COLOR "brown")
+(define RACKET-WIDTH 80)
 (define HALF-RACKET-WIDTH (/ RACKET-WIDTH 2))
-(define RACKET-HEIGHT 12)
+(define RACKET-HEIGHT 15)
 ;;; Racket is rendered as a rectangle of color: RACKET-COLOR
 ;;; with width: RACKET-WIDTH and height: RACKET-HEIGHT.
 
-(define INITIAL-RACKET-X 300)
-(define INITIAL-RACKET-Y 500)
+(define INITIAL-RACKET-X 330)
+(define INITIAL-RACKET-Y 384)
 ;;; starting position of the racket at the start of the game,
 ;;; that is in ready-to-serve state
   
-(define INITIAL-RACKET-VX 5)
-(define INITIAL-RACKET-VY 10)
+(define INITIAL-RACKET-VX 0)
+(define INITIAL-RACKET-VY 0)
 ;;; initial velocity of racket in ready-to-serve state 
 
 ;;; Racket
@@ -91,9 +98,6 @@
        (racket-selected? r)))
 
 
-
-<<<<<<< HEAD
-=======
 ;;; IMPLEMENTATION:
 (define-struct mouse (x y))
 
@@ -164,8 +168,9 @@
                             (- (racket-y r) (- (racket-my r) y))
                             (racket-vx r)
                             (racket-vy r)
-                            x y true)
-      r))
+                            x y
+                            #true)
+     r))
 
 
 ;; racket-after-button-up : Racket Integer Integer -> Racket
@@ -207,5 +212,7 @@
 
 
 
+(define (racket-collide-frontwall? r)
+  (or (< ( + (racket-y r) (racket-vy r)) 0) (= (racket-y r) 0)))
 
->>>>>>> updated racket,Render-game,world
+
