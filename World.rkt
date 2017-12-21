@@ -2,9 +2,7 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname World) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;;; DOUBTS  - how to put playing window in centre ??
-
-
-;;;;;;;;
+;;; make AI Game assist... mimic....
 
 ;;; WORLD - DATA DEFINITIONS
 
@@ -17,28 +15,21 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; CONSTANTS
+;;; CONSTANTS 
 
-;; dimensions of the court
+(define FPS 25) ;;; frames per second
 
-(define COURT-WIDTH 940)
-(define COURT-HEIGHT 680)
-
-;;scenes 
-(define EMPTY-COURT (empty-scene COURT-WIDTH COURT-HEIGHT "white"))
-;(define EMPTY-COURT-AT-PAUSE (empty-scene COURT-WIDTH COURT-HEIGHT "yellow"))
-
-(define FPS 1/20)
-
-(define TOTAL-MISS 10)
+;;; total balls missed, after which game will be over
+(define TOTAL-MISS 5)
 
 ;;; Dimensions of the playing window
-(define WIDTH 940)  ;;; Window Width
-(define HEIGHT 680)  ;;; Window Height
+(define WIDTH 800)  ;;; Window Width
+(define HEIGHT 650)  ;;; Window Height
 
-;(define EMPTY-COURT (empty-scene WIDTH HEIGHT "white"))
-(define EMPTY-COURT (bitmap "court.jpg"))
-;;; Court is rendered as a white rectangle with a black border
+;;;scenes 
+
+(define EMPTY-COURT (empty-scene WIDTH HEIGHT "white"))
+;(define EMPTY-COURT (bitmap "court.jpg"))
 
 (define RESETTING-COURT (empty-scene WIDTH HEIGHT "yellow"))
 ;;; Court turns from white to yellow for 3 seconds while resetting in which
@@ -47,24 +38,26 @@
 (define SPACE " ")
 
 ;; starting state of ball and racket
-(define START-X-COORD 330)
-(define START-Y-COORD 384)
+(define START-X-COORD (/ WIDTH 2))
+(define START-Y-COORD (/ HEIGHT 2))
 (define START-VX 0)
 (define START-VY 0)
 
 ;; ball in rally state
-(define RALLY-VX 3)
-(define RALLY-VY -9)
+(define RALLY-VX -2)
+(define RALLY-VY -12)
 ;; dimensions of the ball
-(define BALL-IMAGE (bitmap "ball.png"))
-;(define BALL-IMAGE (circle 5 "solid" "black"))
+;(define BALL-IMAGE (bitmap "ball.png"))
+(define BALL-IMAGE (circle 6 "solid" "dark grey"))
 
 
 ;; dimensions of the racket
-(define RACKET-IMAGE (rectangle 50 8 "solid" "brown"))
-(define HALF-LENGTH 47/2)
+(define RW 70)  ;;; Window Width
+(define RH 12)  ;;; Window Height
+(define RACKET-IMAGE (rectangle RW RH "solid" "green"))
+(define HALF-LENGTH (/ RW 2))
 
-(define MOUSE-POINTER (circle 3 "solid" "blue"))
+(define MOUSE-POINTER (circle 4 "solid" "blue"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; DATA DEFINITIONS
@@ -137,8 +130,8 @@
 
 
 (define (simulation speed)
-  (big-bang (initial-world FPS)          
-            (on-tick world-after-tick FPS)
+  (big-bang (initial-world (/ 1 FPS))          
+            (on-tick world-after-tick (/ 1 FPS))
             (on-draw world-to-scene)
             (on-key world-after-key-event)
             (on-mouse world-after-mouse-event)))
@@ -365,7 +358,7 @@
          (court-scene w)))))]
     ))
     
-
+ 
 
     ;;scene-with-mouse : Racket Scene -> Scene
     ;GIVEN: racket r and scene s
@@ -525,4 +518,9 @@
    (racket-my r)
    (racket-selected? r)))
 
-    
+
+
+
+;;;; run simulation
+
+(simulation 66)
