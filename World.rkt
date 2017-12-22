@@ -18,7 +18,7 @@
 (define FPS 25) ;;; frames per second
 
 ;;; total balls missed, after which game will be over
-(define TOTAL-MISS 5)
+(define TOTAL-MISS 10)
 
 ;;; Dimensions of the playing window
 (define WIDTH 800)   ;;; Window Width
@@ -54,7 +54,7 @@ RESETTING-COURT
 (define START-VY 0)
 
 ;; ball in rally state
-(define RALLY-VX (+ (* 2 (random 14)) -14))
+(define RALLY-VX (+ (* 2 (random 14)) -18))
 (define RALLY-VY (+ -12 (random 4)))
 
 
@@ -63,11 +63,12 @@ RESETTING-COURT
 ;;; with width: RACKET-WIDTH and height: RACKET-HEIGHT.
   
 ;; dimensions of the racket
-(define RW 70)  ;;; Window Width
+(define RW 120)  ;;; Window Width
 (define RH 12)  ;;; Window Height
 (define RACKET-IMAGE (rectangle RW RH "solid" RACKET-COLOR))
 ;; racket half length
 (define HALF-LENGTH (/ RW 2))
+(define HALF-HEIGHT (/ RH 2))
 
 (define MOUSE-RACKET-DISTANCE 24)
 ;;; The maximum distance of mouse from rectangle, to grab and select
@@ -393,13 +394,13 @@ RESETTING-COURT
 
 (define (in-racket? r x y)
   (and
-   (<= (- (racket-x r) MOUSE-RACKET-DISTANCE)
-       x
-       (+ (racket-x r) MOUSE-RACKET-DISTANCE))
-   (<= 
-    (- (racket-y r) MOUSE-RACKET-DISTANCE)
-    y
-    (+ (racket-y r) MOUSE-RACKET-DISTANCE))))
+   (and
+   (>= y (- (- (racket-y r) HALF-HEIGHT) 5))
+   (>= (+ (+ (racket-y r) HALF-HEIGHT) 15) y))
+
+  (and
+   (>= x (- (- (racket-x r) HALF-LENGTH) 15))
+   (>= (+ (+ (racket-x r) HALF-LENGTH) 15) x))))
 
 
 
@@ -509,6 +510,8 @@ RESETTING-COURT
 ;;DESIGN STRATEGY: divide into cases on world w state 
 (define (world-state-after-space w)
   (cond
+    [(and (string=? (world-state w) "pause") (>= (world-miss w) TOTAL-MISS))
+     (initial-world FPS)]
     [(string=? (world-state w) "play") (world-in-paused-state w)]
     [(string=? (world-state w) "ready") (world-in-play-state w)]
     [(string=? (world-state w) "pause") (world-in-resume-state w)]))
@@ -690,7 +693,8 @@ RESETTING-COURT
           (text/font "SCORE : " 80 "Blue" #f 'roman 'normal 'bold #f)
           (* 0.42 WIDTH) (* 0.65 HEIGHT)
                     (place-image
-          (text/font  (number->string(world-time w)) 80 "Blue" #f 'roman 'normal 'bold #f)
+          (text/font  (number->string(world-time w))
+                      80 "Blue" #f 'roman 'normal 'bold #f)
           (+ 240 (* 0.42 WIDTH)) (* 0.65 HEIGHT)
           (scene-with-balls-list
            (world-balls w)
@@ -838,8 +842,9 @@ RESETTING-COURT
 
 (define (balls-after-tick bl w)
   (cond
-    [(and (> (world-time w) 0) (= 0 (modulo (world-time w) (* 40 2))))
-     (cons (make-ball (+ 300 (random 50)) (+ 300 (random 50))  7 -9)
+    [(and (> (world-time w) 0) (= 0 (modulo (world-time w) (* FPS 2))))
+     (cons (make-ball (+ 50 (random 500)) (+ 350 (random 150))
+                      (+ (* 2 (random 10)) -12)  (+ -12 (random 6)))
            (map
             ;Ball-> Ball
             ;GIVEN: ball b
