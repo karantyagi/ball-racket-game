@@ -664,7 +664,7 @@ RESETTING-COURT
        (* 0.88 WIDTH) (* 0.04 HEIGHT)
        (place-image
         (text/font 
-         (number->string (/ (world-miss w) TOTAL-MISS))
+         (number->string (world-miss w))
          14 "RED" #f 'modern 'normal 'normal #f)
         (+ 80 (* 0.84 WIDTH)) (* 0.07 HEIGHT)
         (place-image
@@ -715,11 +715,11 @@ RESETTING-COURT
    (* 0.88 WIDTH) (* 0.04 HEIGHT)
    (place-image
     (text/font 
-     (number->string (/ (world-miss w) TOTAL-MISS)) 14 "RED" #f 'modern 'normal 'normal #f)
-    (+ 80 (* 0.84 WIDTH)) (* 0.06 HEIGHT)
+     (number->string (world-miss w)) 14 "RED" #f 'modern 'normal 'normal #f)
+    (+ 80 (* 0.84 WIDTH)) (* 0.07 HEIGHT)
     (place-image
      (text/font "Balls Missed:" 14 "RED" #f 'modern 'normal 'normal #f)
-     (* 0.84 WIDTH) (* 0.06 HEIGHT)
+     (* 0.84 WIDTH) (* 0.07 HEIGHT)
      (place-image
       (text/font "GAME PAUSED" 80 "RED" #f 'roman 'normal 'bold #f)
       (* 0.5 WIDTH) (* 0.3 HEIGHT)
