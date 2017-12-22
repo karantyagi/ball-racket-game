@@ -15,14 +15,14 @@
 
 ;;; CONSTANTS 
 
-(define FPS 25) ;;; frames per second
+(define FPS 30) ;;; frames per second
 
 ;;; total balls missed, after which game will be over
 (define TOTAL-MISS 10)
 
 ;;; Dimensions of the playing window
-(define WIDTH 650)   ;;; Window Width
-(define HEIGHT 800)  ;;; Window Height
+(define WIDTH 580)   ;;; Window Width
+(define HEIGHT 685)  ;;; Window Height
 
 ;;; scenes 
 (define EMPTY-COURT (empty-scene WIDTH HEIGHT "white"))
@@ -37,9 +37,10 @@
 RESETTING-COURT
 
 (define SPACE " ")
+(define RESTART "r")
 
 (define BALL-COLOR "black")
-(define BALL-RADIUS 7)
+(define BALL-RADIUS 5.5)
 ;;; Ball is rendered as a circle of color: BALL-COLOR
 ;;; and radius: BALL-RADIUS
 
@@ -63,7 +64,7 @@ RESETTING-COURT
 ;;; with width: RACKET-WIDTH and height: RACKET-HEIGHT.
   
 ;; dimensions of the racket
-(define RW 120)  ;;; Window Width
+(define RW 75)  ;;; Window Width
 (define RH 12)  ;;; Window Height
 (define RACKET-IMAGE (rectangle RW RH "solid" RACKET-COLOR))
 ;; racket half length
@@ -395,12 +396,12 @@ RESETTING-COURT
 (define (in-racket? r x y)
   (and
    (and
-   (>= y (- (- (racket-y r) HALF-HEIGHT) 5))
-   (>= (+ (+ (racket-y r) HALF-HEIGHT) 15) y))
+    (>= y (- (- (racket-y r) HALF-HEIGHT) 5))
+    (>= (+ (+ (racket-y r) HALF-HEIGHT) 15) y))
 
-  (and
-   (>= x (- (- (racket-x r) HALF-LENGTH) 15))
-   (>= (+ (+ (racket-x r) HALF-LENGTH) 15) x))))
+   (and
+    (>= x (- (- (racket-x r) HALF-LENGTH) 15))
+    (>= (+ (+ (racket-x r) HALF-LENGTH) 15) x))))
 
 
 
@@ -491,6 +492,7 @@ RESETTING-COURT
 (define (world-after-key-event w kev)
   (cond
     [(key=? kev SPACE) (world-state-after-space w)]
+    [(key=? kev RESTART) (initial-world FPS)]
     ;    [(and (key=? kev B-KEY) (world-rally-state? w))
     ;     (add-balls-in-world w)]
     [else w]))
@@ -646,36 +648,51 @@ RESETTING-COURT
   (cond
     [(string=? (world-state w) "ready")
      (place-image
-      (text/font "START GAME" 80 "WHITE" #f 'roman 'normal 'bold #f)
-      (* 0.5 WIDTH) (* 0.3 HEIGHT)
+      (text/font "START GAME" 70 "WHITE" #f 'roman 'normal 'bold #f)
+      (* 0.5 WIDTH) (* 0.35 HEIGHT)
       (place-image
-       (text/font "press 'space' to start" 30 "GREEN" #f 'roman 'normal 'bold #f)
-        (* 0.5 WIDTH) (* 0.4 HEIGHT)
-        (scene-with-balls-list
-       (world-balls w)
-       (scene-with-mouse
-        (world-racket w)
-        (scene-with-racket
-         (world-racket w)
-         READY-COURT)))))]
-     
+       (text/font "Press 'space' to start."
+                  30 "GREEN" #f 'roman 'normal 'bold #f)
+       (* 0.5 WIDTH) (* 0.55 HEIGHT)
+       (place-image
+        (text/font "Press 'space' to pause the game."
+                   30 "GREEN" #f 'roman 'normal 'bold #f)
+        (* 0.5 WIDTH) (* 0.62 HEIGHT)
+        (place-image
+         (text/font "Press 'r' to restart."
+                    30 "GREEN" #f 'roman 'normal 'bold #f)
+         (* 0.5 WIDTH) (* 0.69 HEIGHT)
+         (place-image
+          (text/font "Game ends if 10 balls hit the ground."
+                     30 "white" #f 'roman 'normal 'bold #f)
+          (* 0.5 WIDTH) (* 0.45 HEIGHT)
+          (scene-with-balls-list
+           (world-balls w)
+           (scene-with-mouse
+            (world-racket w)
+            (scene-with-racket
+             (world-racket w)
+             READY-COURT))))))))]
+
+
+    
     
     [(string=? (world-state w) "play")  
      (place-image
       (text/font 
        (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
-      (+ 50 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
+      (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
       (place-image
        (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
-       (* 0.88 WIDTH) (* 0.04 HEIGHT)
+       (* 0.82 WIDTH) (* 0.04 HEIGHT)
        (place-image
         (text/font 
          (number->string (world-miss w))
          14 "RED" #f 'modern 'normal 'normal #f)
-        (+ 80 (* 0.84 WIDTH)) (* 0.07 HEIGHT)
+        (+ 72 (* 0.78 WIDTH)) (* 0.07 HEIGHT)
         (place-image
          (text/font "Balls Missed:" 14 "RED" #f 'modern 'normal 'normal #f)
-         (* 0.84 WIDTH) (* 0.07 HEIGHT)
+         (* 0.78 WIDTH) (* 0.07 HEIGHT)
          (scene-with-balls-list
           (world-balls w)
           (scene-with-mouse
@@ -686,56 +703,60 @@ RESETTING-COURT
     
     [(and (string=? (world-state w) "pause") (>= (world-miss w) TOTAL-MISS))
      (place-image
-      (text/font 
-       (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
-      (+ 50 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
+      (text/font "Press 'r' or 'space' to restart."
+                 30 "GREEN" #f 'roman 'normal 'bold #f)
+      (* 0.5 WIDTH) (* 0.7 HEIGHT)
       (place-image
-       (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
-       (* 0.88 WIDTH) (* 0.04 HEIGHT)
+       (text/font 
+        (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
+       (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
+       (place-image
+        (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
+        (* 0.82 WIDTH) (* 0.04 HEIGHT)
+        (place-image
+         (text/font "GAME OVER" 60 "Blue" #f 'roman 'normal 'bold #f)
+         (* 0.5 WIDTH) (* 0.40 HEIGHT)
          (place-image
-          (text/font "GAME OVER" 80 "Blue" #f 'roman 'normal 'bold #f)
-          (* 0.5 WIDTH) (* 0.45 HEIGHT)
+          (text/font "SCORE : " 60 "Blue" #f 'roman 'normal 'bold #f)
+          (* 0.40 WIDTH) (* 0.50 HEIGHT)
           (place-image
-          (text/font "SCORE : " 80 "Blue" #f 'roman 'normal 'bold #f)
-          (* 0.42 WIDTH) (* 0.65 HEIGHT)
-                    (place-image
-          (text/font  (number->string(world-time w))
-                      80 "Blue" #f 'roman 'normal 'bold #f)
-          (+ 240 (* 0.42 WIDTH)) (* 0.65 HEIGHT)
-          (scene-with-balls-list
-           (world-balls w)
-           (scene-with-mouse
-            (world-racket w)
-            (scene-with-racket
+           (text/font  (number->string(world-time w))
+                       60 "Blue" #f 'roman 'normal 'bold #f)
+           (+ 180 (* 0.42 WIDTH)) (* 0.50 HEIGHT)
+           (scene-with-balls-list
+            (world-balls w)
+            (scene-with-mouse
              (world-racket w)
-             (court-scene w)))))))))]
+             (scene-with-racket
+              (world-racket w)
+              EMPTY-COURT)))))))))] 
     
 [(string=? (world-state w) "pause")
      
  (place-image
   (text/font 
    (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
-  (+ 50 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
+  (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
   (place-image
    (text/font "Time:" 14 "RED" #f 'modern'normal 'normal #f)
-   (* 0.88 WIDTH) (* 0.04 HEIGHT)
+   (* 0.82 WIDTH) (* 0.04 HEIGHT)
    (place-image
     (text/font 
      (number->string (world-miss w)) 14 "RED" #f 'modern 'normal 'normal #f)
-    (+ 80 (* 0.84 WIDTH)) (* 0.07 HEIGHT)
+    (+ 72 (* 0.78 WIDTH)) (* 0.07 HEIGHT)
     (place-image
      (text/font "Balls Missed:" 14 "RED" #f 'modern 'normal 'normal #f)
-     (* 0.84 WIDTH) (* 0.07 HEIGHT)
+     (* 0.78 WIDTH) (* 0.07 HEIGHT)
      (place-image
-      (text/font "GAME PAUSED" 80 "RED" #f 'roman 'normal 'bold #f)
-      (* 0.5 WIDTH) (* 0.3 HEIGHT)
+      (text/font "Game  Paused" 50 "RED" #f 'roman 'normal 'bold #f)
+      (* 0.5 WIDTH) (* 0.42 HEIGHT)
       (scene-with-balls-list
        (world-balls w)
        (scene-with-mouse
         (world-racket w)
         (scene-with-racket
          (world-racket w)
-         (court-scene w)))))))))]
+         (court-scene w)))))))))] 
 ))
     
 
@@ -900,7 +921,7 @@ RESETTING-COURT
    (racket-vy r)
    (racket-mx r)
    (racket-my r)
-   (racket-selected? r))) 
+   (racket-selected? r)))  
 
 
 
