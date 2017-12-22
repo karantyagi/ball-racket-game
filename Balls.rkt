@@ -115,8 +115,6 @@
 ;;;	    (ball-list-fn (rest list)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; EXAMPLES OF WORLDS FOR TESTING:
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (ball-collide-wall? b)
   ( or (ball-collide-topwall? b) (ball-collide-leftwall? b)
