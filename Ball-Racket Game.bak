@@ -137,7 +137,6 @@ RESETTING-COURT
 ;;;                relative to the origin of the scene
 ;;; vx : Int    x component of the ball's velocity, in pixels/tick
 ;;; vy : Int    y component of the ball's velocity, in pixels/tick
-;;; life : NonNegInt  time for which ball is alive
 ;;;
 ;;; EXPLAINATION:
 ;;;
@@ -714,15 +713,15 @@ RESETTING-COURT
         (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
         (* 0.82 WIDTH) (* 0.04 HEIGHT)
         (place-image
-         (text/font "GAME OVER" 60 "Blue" #f 'roman 'normal 'bold #f)
+         (text/font "GAME OVER" 45 "Blue" #f 'roman 'normal 'bold #f)
          (* 0.5 WIDTH) (* 0.40 HEIGHT)
          (place-image
-          (text/font "SCORE : " 60 "Blue" #f 'roman 'normal 'bold #f)
-          (* 0.40 WIDTH) (* 0.50 HEIGHT)
+          (text/font "SCORE : " 45 "Blue" #f 'roman 'normal 'bold #f)
+          (* 0.43 WIDTH) (* 0.50 HEIGHT)
           (place-image
            (text/font  (number->string(world-time w))
-                       60 "Blue" #f 'roman 'normal 'bold #f)
-           (+ 180 (* 0.42 WIDTH)) (* 0.50 HEIGHT)
+                       45 "Blue" #f 'roman 'normal 'bold #f)
+           (+ 160 (* 0.42 WIDTH)) (* 0.50 HEIGHT)
            (scene-with-balls-list
             (world-balls w)
             (scene-with-mouse
