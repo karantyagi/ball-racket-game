@@ -1,8 +1,10 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname World) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
-;;; WORLD - DATA DEFINITIONS
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname |Ball-Racket Game|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;;; DOUBTS  - how to put playing window in centre ??
+;;; make AI Game assist... mimic....
 
+;;; WORLD - DATA DEFINITIONS
 
 (require rackunit) 
 (require 2htdp/universe)
@@ -13,7 +15,7 @@
 
 ;;; CONSTANTS 
 
-(define FPS 25) ;;; frames per second
+(define FPS 30) ;;; frames per second
 
 ;;; total balls missed, after which game will be over
 (define TOTAL-MISS 10)
@@ -36,7 +38,6 @@ RESETTING-COURT
 
 (define SPACE " ")
 (define RESTART "r")
-(define FREEZE "f")
 
 (define BALL-COLOR "black")
 (define BALL-RADIUS 5.5)
@@ -414,21 +415,19 @@ RESETTING-COURT
 
 ;;; IMPLEMENTATION OF WORLD
 (define-struct world
-  (balls racket state time sec miss freeze))
+  (balls racket state time miss))
 
 ;;; CONSTRUCTOR TEMPLATE:
-;;; (make-world BallList Racket State NonNegInt NonNegReal NonNegInt NonNegInt)
+;;; (make-world BallList Racket Boolean PosInt NonNegInt)
 
 ;;; OBSERVER TEMPLATE:
 ;;; world-fn : World -> ??
-#;(define (world-fn w)
-    (... (world-balls w) 
-         (world-racket w) 
-         (world-state w)
-         (world-time w)
-         (world-sec w)
-         (world-miss w)
-         (world-freeze w)))
+(define (world-fn w)
+  (... (world-balls w) 
+       (world-racket w) 
+       (world-state w)
+       (world-time w)
+       (world-miss w)))
 
 
 ;; a STATE is represented by one of :
@@ -479,7 +478,7 @@ RESETTING-COURT
                 0 0
                 #false)
    "ready"                            
-   0 0 0 0))
+   0 0))
 
 
 ; world-after-key-event : World KeyEvent -> World
@@ -495,7 +494,6 @@ RESETTING-COURT
     [(key=? kev RESTART) (initial-world FPS)]
     ;    [(and (key=? kev B-KEY) (world-rally-state? w))
     ;     (add-balls-in-world w)]
-    [(key=? kev FREEZE) (world-after-freeze-keypress w)]
     [else w]))
 
 
@@ -520,13 +518,6 @@ RESETTING-COURT
     [(string=? (world-state w) "pause") (world-in-resume-state w)]))
 
 
-(define (world-after-freeze-keypress w)
-  (cond
-    [(= 0 (world-freeze w)) (world-at-time-freeze w)]
-    [(= 1 (world-freeze w)) (world-in-play-again-state w)]
-    [else w ]))
-
-
 ;; world-after-mouse-event: World Int Int MouseEvent -> World
 ; GIVEN: a world, the x and y coordinates of a mouse event,
 ;     and the mouse event
@@ -548,9 +539,7 @@ RESETTING-COURT
        (racket-after-mouse-event (world-racket w) mx my mev)
        "play"
        (world-time w)
-       (world-sec w)
-       (world-miss w)
-       (world-freeze w))
+       (world-miss w))
       w))
 
 ;; world-in-paused-state : World -> World
@@ -567,9 +556,7 @@ RESETTING-COURT
    (world-racket w)
    "pause"
    (world-time w)
-   (world-sec w)
-   (world-miss w)
-   (world-freeze w)))
+   (world-miss w)))
 
 
 (define (world-in-resume-state w)
@@ -578,9 +565,7 @@ RESETTING-COURT
    (world-racket w)
    "play"
    (world-time w)
-   (world-sec w)
-   (world-miss w)
-   (world-freeze w)))
+   (world-miss w)))
 
 
 (define (world-at-game-over w)
@@ -589,38 +574,15 @@ RESETTING-COURT
    (world-racket w)
    "pause"
    (world-time w)
-   (world-sec w)
-   TOTAL-MISS
-   (world-freeze w)))
+   TOTAL-MISS))
 
 (define (world-in-play-state w)
   (make-world
    (ball-rally-state (world-balls w))
    (world-racket w)
    "play"
-   1
-   (/ 1 FPS)
-   0
-   0))
-
-(define (world-in-play-again-state w)
-  (make-world
-   (ball-rally-state (world-balls w))
-   (world-racket w)
-   "play"
-   (world-time w)
-   (world-sec w)
-   (world-miss w)
-   2))
-
-(define (world-at-time-freeze w)
-  (make-world
-   (ball-rally-state (world-balls w))
-   (world-racket w)
-   "play"
-   (world-time w) (world-sec w) 0
-   1))
-   
+   1 0
+   ))
 
 (define (ball-rally-state bl)
   (map
@@ -652,24 +614,13 @@ RESETTING-COURT
 
 
 (define (world-during-play-state w)
-  (if (not(= 1 (world-freeze w)))
-      (make-world
-       (balls-after-tick (world-balls w) w)
-       (racket-after-tick w)
-       "play"
-       (+ (world-time w) 1)
-       (+ (world-sec w) 0.04)
-       (update-miss w)
-       (world-freeze w))
-
-      (make-world
-       (world-balls w)
-       (racket-after-tick w)
-       "play"
-       (world-time w)
-       (/ (world-time w) FPS)
-       (world-miss w)
-       (world-freeze w)))) 
+  (make-world
+   (balls-after-tick (world-balls w) w)
+   (racket-after-tick w)
+   "play"
+   (+ (world-time w) 1)
+   (update-miss w)
+   ))
 
 
 
@@ -711,53 +662,23 @@ RESETTING-COURT
                     30 "GREEN" #f 'roman 'normal 'bold #f)
          (* 0.5 WIDTH) (* 0.69 HEIGHT)
          (place-image
-          (text/font "Press 'f' to freeze time. (can be used only once)"
-                     25 "GREEN" #f 'roman 'normal 'bold #f)
-          (* 0.5 WIDTH) (* 0.74 HEIGHT) 
-          (place-image
-           (text/font "Game ends if 10 balls hit the ground."
-                      30 "white" #f 'roman 'normal 'bold #f)
-           (* 0.5 WIDTH) (* 0.45 HEIGHT)
-           (scene-with-balls-list
-            (world-balls w)
-            (scene-with-mouse
-             (world-racket w)
-             (scene-with-racket
-              (world-racket w)
-              READY-COURT)))))))))]
-
-    
-    [(string=? (world-state w) "play")
-     (if (= (world-freeze w) 1)
-     (place-image
-      (text/font "TIME FREEZE - Racket can be moved."
-                 30 "Forestgreen" #f 'roman 'normal 'bold #f)
-      (* 0.5 WIDTH) (* 0.30 HEIGHT)
-      (place-image
-       (text/font
-         (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
-       (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
-       (place-image
-        (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
-        (* 0.82 WIDTH) (* 0.04 HEIGHT)
-        (place-image
-         (text/font 
-          (number->string (world-miss w))
-          14 "RED" #f 'modern 'normal 'normal #f)
-         (+ 72 (* 0.78 WIDTH)) (* 0.07 HEIGHT)
-         (place-image
-          (text/font "Balls Missed:" 14 "RED" #f 'modern 'normal 'normal #f)
-          (* 0.78 WIDTH) (* 0.07 HEIGHT)
+          (text/font "Game ends if 10 balls hit the ground."
+                     30 "white" #f 'roman 'normal 'bold #f)
+          (* 0.5 WIDTH) (* 0.45 HEIGHT)
           (scene-with-balls-list
            (world-balls w)
            (scene-with-mouse
             (world-racket w)
             (scene-with-racket
              (world-racket w)
-             (court-scene w)))))))))
-     
+             READY-COURT))))))))]
+
+
+    
+    
+    [(string=? (world-state w) "play")  
      (place-image
-      (text/font  
+      (text/font 
        (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
       (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
       (place-image
@@ -777,37 +698,37 @@ RESETTING-COURT
            (world-racket w)
            (scene-with-racket
             (world-racket w)
-            (court-scene w)))))))))]   
+            (court-scene w))))))))]
     
-[(and (string=? (world-state w) "pause") (>= (world-miss w) TOTAL-MISS))
- (place-image
-  (text/font "Press 'r' or 'space' to restart."
-             30 "GREEN" #f 'roman 'normal 'bold #f)
-  (* 0.5 WIDTH) (* 0.7 HEIGHT)
-  (place-image
-   (text/font 
-    (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
-   (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
-   (place-image
-    (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
-    (* 0.82 WIDTH) (* 0.04 HEIGHT)
-    (place-image
-     (text/font "GAME OVER" 45 "Blue" #f 'roman 'normal 'bold #f)
-     (* 0.5 WIDTH) (* 0.40 HEIGHT)
+    [(and (string=? (world-state w) "pause") (>= (world-miss w) TOTAL-MISS))
      (place-image
-      (text/font "SCORE : " 45 "Blue" #f 'roman 'normal 'bold #f)
-      (* 0.43 WIDTH) (* 0.50 HEIGHT)
+      (text/font "Press 'r' or 'space' to restart."
+                 30 "GREEN" #f 'roman 'normal 'bold #f)
+      (* 0.5 WIDTH) (* 0.7 HEIGHT)
       (place-image
-       (text/font  (number->string (world-time w))
-                   45 "Blue" #f 'roman 'normal 'bold #f)
-       (+ 160 (* 0.42 WIDTH)) (* 0.50 HEIGHT)
-       (scene-with-balls-list
-        (world-balls w)
-        (scene-with-mouse
-         (world-racket w)
-         (scene-with-racket
-          (world-racket w)
-          EMPTY-COURT)))))))))] 
+       (text/font 
+        (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
+       (+ 50 (* 0.82 WIDTH)) (* 0.04 HEIGHT)
+       (place-image
+        (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
+        (* 0.82 WIDTH) (* 0.04 HEIGHT)
+        (place-image
+         (text/font "GAME OVER" 45 "Blue" #f 'roman 'normal 'bold #f)
+         (* 0.5 WIDTH) (* 0.40 HEIGHT)
+         (place-image
+          (text/font "SCORE : " 45 "Blue" #f 'roman 'normal 'bold #f)
+          (* 0.43 WIDTH) (* 0.50 HEIGHT)
+          (place-image
+           (text/font  (number->string(world-time w))
+                       45 "Blue" #f 'roman 'normal 'bold #f)
+           (+ 160 (* 0.42 WIDTH)) (* 0.50 HEIGHT)
+           (scene-with-balls-list
+            (world-balls w)
+            (scene-with-mouse
+             (world-racket w)
+             (scene-with-racket
+              (world-racket w)
+              EMPTY-COURT)))))))))] 
     
 [(string=? (world-state w) "pause")
      
@@ -837,6 +758,11 @@ RESETTING-COURT
          (court-scene w)))))))))] 
 ))
     
+
+
+(define (playtime w)
+  (/ (world-time w) FPS))
+
 ;;scene-with-mouse : Racket Scene -> Scene
 ;GIVEN: racket r and scene s
 ;;RETURN: mouse pointer in the given scene s
