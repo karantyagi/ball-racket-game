@@ -54,8 +54,8 @@
 
 (define HALF-LENGTH 47/2) ;; racket half length
 
-(define COURT-WIDTH 940)
-(define COURT-HEIGHT 680)
+(define COURT-WIDTH 650)
+(define COURT-HEIGHT 800)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; DATA DEFINITION
