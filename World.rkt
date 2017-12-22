@@ -21,8 +21,8 @@
 (define TOTAL-MISS 10)
 
 ;;; Dimensions of the playing window
-(define WIDTH 800)   ;;; Window Width
-(define HEIGHT 650)  ;;; Window Height
+(define WIDTH 650)   ;;; Window Width
+(define HEIGHT 800)  ;;; Window Height
 
 ;;; scenes 
 (define EMPTY-COURT (empty-scene WIDTH HEIGHT "white"))
@@ -604,7 +604,8 @@ RESETTING-COURT
   (cond
     [(string=? (world-state w) "pause") w]
     [(string=? (world-state w) "ready") w]
-    [(or (racket-collide-frontwall? (world-racket w)) (= (world-miss w) TOTAL-MISS))   
+    [(or (racket-collide-frontwall? (world-racket w))
+         (= (world-miss w) TOTAL-MISS))   
      (world-at-game-over w)]
     [ else
       (world-during-play-state w)]))
@@ -627,8 +628,9 @@ RESETTING-COURT
           ;GIVEN: ball b in world
           ;RETURN: true iff given ball has not hit backwall 
           (define (ball-backwall-collide? b)
-            (< 680 (+ (ball-y b) (ball-vy b)))))
+            (< HEIGHT (+ (ball-y b) (ball-vy b)))))
     (+ (world-miss w)(length (filter ball-backwall-collide? (world-balls w))))))
+
 
 ;; world-to-scene : World -> Scene
 ;; RETURNS: a Scene that portrays the given world.
@@ -646,13 +648,17 @@ RESETTING-COURT
      (place-image
       (text/font "START GAME" 80 "WHITE" #f 'roman 'normal 'bold #f)
       (* 0.5 WIDTH) (* 0.3 HEIGHT)
-      (scene-with-balls-list
+      (place-image
+       (text/font "press 'space' to start" 30 "GREEN" #f 'roman 'normal 'bold #f)
+        (* 0.5 WIDTH) (* 0.4 HEIGHT)
+        (scene-with-balls-list
        (world-balls w)
        (scene-with-mouse
         (world-racket w)
         (scene-with-racket
          (world-racket w)
-         READY-COURT))))]
+         READY-COURT)))))]
+     
     
     [(string=? (world-state w) "play")  
      (place-image
@@ -854,7 +860,7 @@ RESETTING-COURT
                     ;GIVEN: ball b in world 
                     ;RETURN: true iff given ball has not hit backwall 
                     (define (ball-backwall-collision? b)
-                      (not(< 680 (+ (ball-y b) (ball-vy b))))))
+                      (not(< HEIGHT (+ (ball-y b) (ball-vy b))))))
               (filter ball-backwall-collision? bl))))]
 
     [else
@@ -867,7 +873,7 @@ RESETTING-COURT
               ;GIVEN: ball b in world
               ;RETURN: true iff given ball has not hit backwall 
               (define (ball-backwall-collision? b)
-                (not(< 680 (+ (ball-y b) (ball-vy b))))))
+                (not(< HEIGHT (+ (ball-y b) (ball-vy b))))))
         (filter ball-backwall-collision? bl)))]))
 
 
