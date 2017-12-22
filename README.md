@@ -1,2 +1,2 @@
-# Ball-Game
-Using functional programming concepts to implement a ball-racket game
+# Squash Game
+Using functional programming concepts to implement a squash game
