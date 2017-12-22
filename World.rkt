@@ -651,25 +651,73 @@ RESETTING-COURT
          (world-racket w)
          READY-COURT))))]
     
-    [(string=? (world-state w) "play") 
+    [(string=? (world-state w) "play")  
      (place-image
       (text/font 
-       (number->string (world-time w)) 14 "RED" #f 'system 'normal 'normal #f)
-      (+ 35 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
+       (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
+      (+ 50 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
       (place-image
-       (text/font "Time :" 14 "RED" #f 'system 'normal 'normal #f)
-       (* 0.88 WIDTH) (* 0.04 HEIGHT) 
-       (scene-with-balls-list
-        (world-balls w)
-        (scene-with-mouse
-         (world-racket w)
-         (scene-with-racket
-          (world-racket w)
-          (court-scene w))))))]
+       (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
+       (* 0.88 WIDTH) (* 0.04 HEIGHT)
+       (place-image
+        (text/font 
+         (number->string (/ (world-miss w) TOTAL-MISS))
+         14 "RED" #f 'modern 'normal 'normal #f)
+        (+ 80 (* 0.84 WIDTH)) (* 0.07 HEIGHT)
+        (place-image
+         (text/font "Balls Missed:" 14 "RED" #f 'modern 'normal 'normal #f)
+         (* 0.84 WIDTH) (* 0.07 HEIGHT)
+         (scene-with-balls-list
+          (world-balls w)
+          (scene-with-mouse
+           (world-racket w)
+           (scene-with-racket
+            (world-racket w)
+            (court-scene w))))))))]
     
     [(and (string=? (world-state w) "pause") (>= (world-miss w) TOTAL-MISS))
      (place-image
-      (text/font "GAME OVER" 80 "Blue" #f 'roman 'normal 'bold #f)
+      (text/font 
+       (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
+      (+ 50 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
+      (place-image
+       (text/font "Time:" 14 "RED" #f 'modern 'normal 'normal #f)
+       (* 0.88 WIDTH) (* 0.04 HEIGHT)
+         (place-image
+          (text/font "GAME OVER" 80 "Blue" #f 'roman 'normal 'bold #f)
+          (* 0.5 WIDTH) (* 0.45 HEIGHT)
+          (place-image
+          (text/font "SCORE : " 80 "Blue" #f 'roman 'normal 'bold #f)
+          (* 0.42 WIDTH) (* 0.65 HEIGHT)
+                    (place-image
+          (text/font  (number->string(world-time w)) 80 "Blue" #f 'roman 'normal 'bold #f)
+          (+ 240 (* 0.42 WIDTH)) (* 0.65 HEIGHT)
+          (scene-with-balls-list
+           (world-balls w)
+           (scene-with-mouse
+            (world-racket w)
+            (scene-with-racket
+             (world-racket w)
+             (court-scene w)))))))))]
+    
+[(string=? (world-state w) "pause")
+     
+ (place-image
+  (text/font 
+   (number->string (world-time w)) 14 "RED" #f 'modern 'normal 'normal #f)
+  (+ 50 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
+  (place-image
+   (text/font "Time:" 14 "RED" #f 'modern'normal 'normal #f)
+   (* 0.88 WIDTH) (* 0.04 HEIGHT)
+   (place-image
+    (text/font 
+     (number->string (/ (world-miss w) TOTAL-MISS)) 14 "RED" #f 'modern 'normal 'normal #f)
+    (+ 80 (* 0.84 WIDTH)) (* 0.06 HEIGHT)
+    (place-image
+     (text/font "Balls Missed:" 14 "RED" #f 'modern 'normal 'normal #f)
+     (* 0.84 WIDTH) (* 0.06 HEIGHT)
+     (place-image
+      (text/font "GAME PAUSED" 80 "RED" #f 'roman 'normal 'bold #f)
       (* 0.5 WIDTH) (* 0.3 HEIGHT)
       (scene-with-balls-list
        (world-balls w)
@@ -677,27 +725,8 @@ RESETTING-COURT
         (world-racket w)
         (scene-with-racket
          (world-racket w)
-         (court-scene w)))))]
-    
-    [(string=? (world-state w) "pause")
-     (place-image
-      (text/font 
-       (number->string (world-time w)) 14 "RED" #f 'system 'normal 'normal #f)
-      (+ 35 (* 0.88 WIDTH)) (* 0.04 HEIGHT)
-      (place-image
-       (text/font "Time :" 14 "RED" #f 'system 'normal 'normal #f)
-       (* 0.88 WIDTH) (* 0.04 HEIGHT) 
-       (place-image
-        (text/font "GAME PAUSED" 80 "RED" #f 'roman 'normal 'bold #f)
-        (* 0.5 WIDTH) (* 0.3 HEIGHT)
-        (scene-with-balls-list
-         (world-balls w)
-         (scene-with-mouse
-          (world-racket w)
-          (scene-with-racket
-           (world-racket w)
-           (court-scene w)))))))]
-    ))
+         (court-scene w)))))))))]
+))
     
 
 
